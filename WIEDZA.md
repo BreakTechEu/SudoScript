@@ -46,3 +46,9 @@ SudoScript/
     ├── __init__.py
     └── schema.py          # Typy danych (dataclasses / Pydantic np. ScriptSegment)
 ```
+
+## 5. Trwałe zasady działania i polityka projektu
+1. **Prywatność i tryb Offline:** Przetwarzanie (transkrypcja, analiza VLM, obróbka wideo) odbywa się w 100% lokalnie. Zewnętrzne API nie są używane (brak wysyłania wrażliwych danych wideo do chmury).
+2. **Użytek niekomercyjny:** Projekt służy wyłącznie celom edukacyjnym i badawczym.
+3. **Prawa autorskie:** Mechanizmy projektu mogą przetwarzać wyłącznie te pliki audiowizualne, do których użytkownik ma pełne prawa, licencję, lub odpowiednią zgodę na przetwarzanie. Należy kategorycznie unikać użycia narzędzia w sposób naruszający własność intelektualną osób trzecich.
+4. **Modułowość:** Architektura projektu musi pozwalać na niezależne wymienianie silników (np. zmiana Whispera na inny transkryber lub zmiana silnika LLM).
