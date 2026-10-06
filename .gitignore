@@ -1,7 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.class
 *.so
 .Python
 env/
@@ -51,6 +51,8 @@ temp_audio/
 .vscode/
 *.swp
 *.swo
+
+# AI
 WIEDZA.md
 STATUS_PROJEKTU.md
 GEMINI.md

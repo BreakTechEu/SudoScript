@@ -1,12 +1,14 @@
-# Zastrzeżenie prawne i warunki użytkowania (Disclaimer)
+**English** | [Polski](DISCLAIMER.pl.md)
 
-## 1. Użytek wyłącznie niekomercyjny
-Projekt **SudoScript** został stworzony i udostępniony wyłącznie do celów edukacyjnych, badawczych i prywatnego użytku niekomercyjnego. Jakiekolwiek komercyjne wykorzystanie oprogramowania lub usług opartych na tym rozwiązaniu bez wyraźnej zgody autora jest zabronione.
+# Legal Disclaimer and Terms of Use
 
-## 2. Prawa do przetwarzanych materiałów
-Użytkownik oprogramowania przyjmuje do wiadomości i zobowiązuje się, że:
-- Program może być stosowany wyłącznie do przetwarzania materiałów audiowizualnych, do których użytkownik posiada pełne autorskie prawa majątkowe lub odpowiednią licencję/zgodę na przetwarzanie, transkrypcję i tłumaczenie.
-- Niedozwolone jest używanie programu do naruszania praw autorskich, praw pokrewnych oraz własności intelektualnej podmiotów trzecich.
+## 1. Non-commercial Use Only
+The **SudoScript** project was created and is provided solely for educational, research, and private non-commercial purposes. Any commercial use of the software or services based on this solution without the explicit consent of the author is prohibited.
 
-## 3. Wyłączenie odpowiedzialności
-Twórcy oprogramowania nie ponoszą żadnej odpowiedzialności za sposób wykorzystania programu przez użytkowników, w szczególności za przetwarzanie nielegalnych, nieautoryzowanych lub chronionych prawem autorskim treści bez wymaganych uprawnień.
+## 2. Rights to Processed Materials
+The user of the software acknowledges and agrees that:
+- The program may only be used to process audiovisual materials to which the user holds full economic copyrights or a relevant license/consent for processing, transcription, and translation.
+- It is forbidden to use the program to infringe upon the copyrights, related rights, and intellectual property of third parties.
+
+## 3. Limitation of Liability
+The creators of the software bear no responsibility for the way the program is used by users, in particular for the processing of illegal, unauthorized, or copyrighted content without the required permissions.
