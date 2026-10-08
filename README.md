@@ -38,6 +38,26 @@ source .venv/bin/activate  # on Unix/MacOS
 pip install -r requirements.txt
 ```
 
+## ▶️ Usage
+
+```bash
+# Generate Polish subtitles for a video (default: subtitles mode, .srt output)
+python main.py movie.mkv --target-language Polish
+
+# Other work modes (phase 2 groundwork: scripts for external TTS tools)
+python main.py movie.mkv --mode voiceover --format json
+python main.py movie.mkv --mode dubbing --format json
+
+# Resume an interrupted run without recomputing finished steps
+python main.py movie.mkv --from-step translate
+
+# Key overrides (defaults in brackets)
+python main.py movie.mkv --whisper-model medium --vlm-model qwen2.5vl:7b --cpl 42 --cps 17
+```
+
+Run `python main.py --help` for the full list of options.
+Unit tests: `pip install -r requirements.txt && pytest tests`.
+
 ## 🤝 Contributing Guidelines
 We collaborate asynchronously in this project. Since engineers from different backgrounds work here, please follow these rules:
 1. **Feature Branches:** Never commit directly to the `master` branch. Every new feature, fix, or refactor must be done on a separate branch (e.g. `feature/audio-extraction`, `fix/subtitle-sync`).

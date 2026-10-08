@@ -38,6 +38,26 @@ source .venv/bin/activate  # na systemach Unix/MacOS
 pip install -r requirements.txt
 ```
 
+## ▶️ Użycie
+
+```bash
+# Wygeneruj polskie napisy dla wideo (domyślnie: tryb subtitles, wyjście .srt)
+python main.py film.mkv --target-language Polish
+
+# Pozostałe tryby pracy (faza 2: skrypty dla zewnętrznych narzędzi TTS)
+python main.py film.mkv --mode voiceover --format json
+python main.py film.mkv --mode dubbing --format json
+
+# Wznów przerwane zadanie bez przeliczania zakończonych kroków
+python main.py film.mkv --from-step translate
+
+# Najważniejsze nadpisania (wartości domyślne w nawiasach)
+python main.py film.mkv --whisper-model medium --vlm-model qwen2.5vl:7b --cpl 42 --cps 17
+```
+
+Pełna lista opcji: `python main.py --help`.
+Testy jednostkowe: `pip install -r requirements.txt && pytest tests`.
+
 ## 🤝 Zasady współpracy (Ważne dla programistów)
 W tym projekcie współpracujemy asynchronicznie. Ponieważ pracują tu inżynierowie z różnych środowisk, stosujemy poniższe zasady:
 1. **Praca na branchach (Feature Branches):** Nigdy nie commituj bezpośrednio do gałęzi `master`. Każda nowa funkcjonalność, poprawka czy refaktoryzacja musi być realizowana na osobnej gałęzi (np. `feature/audio-extraction`, `fix/subtitle-sync`).
@@ -46,7 +66,7 @@ W tym projekcie współpracujemy asynchronicznie. Ponieważ pracują tu inżynie
    - `feat:` nowa funkcja
    - `fix:` usunięcie usterki
    - `docs:` aktualizacja dokumentacji
-   - `refactor:` zmiany w kodzie bez zmiany działania
+   - `refactor:` zmiany w kodzie bez zmian w działaniu
    - `chore:` aktualizacje zależności, konfiguracje
 4. **Modułowość:** Dbaj o małe, dobrze wyizolowane pliki. Każda usługa (np. Whisper, Ollama, FFmpeg) powinna znajdować się w osobnym module, z pełną obsługą wyjątków.
 
