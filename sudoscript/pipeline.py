@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import base64
-import json
 import logging
 import os
 import shutil
@@ -35,12 +34,15 @@ class Settings:
     max_lines: int = 2
     request_timeout_s: int = 180
     allow_remote_ollama: bool = False
+    visual_context: bool = True
 
     def validate(self) -> None:
         if not self.target_language.strip():
             raise SudoScriptError("Target language cannot be empty.")
         if self.max_chars_per_line < 10 or self.max_lines not in (1, 2, 3):
             raise SudoScriptError("Invalid subtitle layout limits.")
+        if self.request_timeout_s < 1:
+            raise SudoScriptError("Request timeout must be positive.")
         parsed = urlparse(self.ollama_url)
         if parsed.scheme not in ("http", "https") or not parsed.hostname:
             raise SudoScriptError("Ollama URL must be a valid HTTP(S) URL.")
@@ -78,6 +80,7 @@ class Pipeline:
             "ollama_url": self.settings.ollama_url,
             "max_chars_per_line": self.settings.max_chars_per_line,
             "max_lines": self.settings.max_lines,
+            "visual_context": self.settings.visual_context,
         })
         state = self._load_state(input_hash, config_hash)
         audio_path = self.workdir / "audio.wav"
@@ -96,7 +99,15 @@ class Pipeline:
         if state.stage not in ("translated", "exported") or any(
             segment.status != "translated" for segment in state.segments
         ):
-            self._translate(state.segments)
+            if self.settings.visual_context:
+                self._extract_frames(state.segments)
+                atomic_write_json(self.state_path, state.to_dict())
+            try:
+                self._translate(state.segments)
+            except SudoScriptError:
+                # Persist successful segments so retry resumes at the first failed segment.
+                atomic_write_json(self.state_path, state.to_dict())
+                raise
             state.stage = "translated"
             atomic_write_json(self.state_path, state.to_dict())
 
@@ -185,21 +196,63 @@ class Pipeline:
         except Exception as exc:
             raise SudoScriptError(f"Transcription failed: {exc}") from exc
 
+    def _extract_frames(self, segments: list[Segment]) -> None:
+        frame_dir = self.workdir / "frames"
+        frame_dir.mkdir(parents=True, exist_ok=True)
+        for segment in segments:
+            if segment.frame_path and Path(segment.frame_path).is_file():
+                continue
+            frame_path = frame_dir / f"segment-{segment.index:06d}.jpg"
+            temporary = frame_path.with_name(f".{frame_path.name}.tmp.jpg")
+            command = [
+                self.settings.ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "error",
+                "-y", "-ss", f"{(segment.start + segment.end) / 2:.3f}",
+                "-i", str(self.video_path), "-frames:v", "1", "-q:v", "3", str(temporary),
+            ]
+            try:
+                result = subprocess.run(command, capture_output=True, text=True, timeout=60, check=False)
+                if result.returncode == 0 and temporary.is_file() and temporary.stat().st_size:
+                    os.replace(temporary, frame_path)
+                    segment.frame_path = str(frame_path)
+                else:
+                    segment.frame_path = None
+                    message = f"No frame extracted for segment {segment.index}."
+                    if message not in []:
+                        log.warning(message)
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                segment.frame_path = None
+                log.warning("Frame extraction failed for segment %d: %s", segment.index, exc)
+            finally:
+                temporary.unlink(missing_ok=True)
+
     def _translate(self, segments: list[Segment]) -> None:
         for segment in segments:
             if segment.status == "translated" and segment.translated_text:
                 continue
+            visual_note = (
+                "A still frame from the time of this dialogue is attached. Use it only as "
+                "limited context; do not invent dialogue or infer facts unsupported by speech.\n"
+                if segment.frame_path and Path(segment.frame_path).is_file()
+                else "No video frame is available; translate from dialogue only.\n"
+            )
+            message: dict[str, object] = {
+                "role": "user",
+                "content": (
+                    f"Translate the spoken dialogue into {self.settings.target_language}. "
+                    "Preserve meaning, tone and names. Return only the translation, without "
+                    "quotes, commentary or markdown.\n" + visual_note +
+                    "\nSource dialogue:\n" + segment.source_text
+                ),
+            }
+            if segment.frame_path and Path(segment.frame_path).is_file():
+                try:
+                    message["images"] = [base64.b64encode(Path(segment.frame_path).read_bytes()).decode("ascii")]
+                except OSError as exc:
+                    log.warning("Cannot read frame for segment %d: %s", segment.index, exc)
             payload: dict[str, object] = {
                 "model": self.settings.ollama_model,
                 "stream": False,
-                "messages": [{
-                    "role": "user",
-                    "content": (
-                        f"Translate the spoken dialogue into {self.settings.target_language}. "
-                        "Preserve meaning, tone and names. Return only the translation, without "
-                        "quotes, commentary or markdown.\n\nSource dialogue:\n" + segment.source_text
-                    ),
-                }],
+                "messages": [message],
                 "options": {"temperature": 0.1},
             }
             try:
