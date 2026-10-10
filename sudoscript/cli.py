@@ -22,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ollama-model", default="qwen2.5vl:7b")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     parser.add_argument("--allow-remote-ollama", action="store_true")
+    parser.add_argument("--text-only", action="store_true", help="Do not extract or send video frames.")
     parser.add_argument("--max-chars-per-line", type=int, default=42)
     parser.add_argument("--max-lines", type=int, default=2)
     parser.add_argument("-v", "--verbose", action="store_true")
@@ -42,6 +43,7 @@ def main(argv: list[str] | None = None) -> int:
         max_chars_per_line=args.max_chars_per_line,
         max_lines=args.max_lines,
         allow_remote_ollama=args.allow_remote_ollama,
+        visual_context=not args.text_only,
     )
     try:
         output = Pipeline(args.video, settings, args.workdir).run(args.output)
